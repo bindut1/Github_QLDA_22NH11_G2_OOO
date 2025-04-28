@@ -1,0 +1,72 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="container" style="background-color: #f4f4f4; padding: 20px; border-radius: 8px; font-family: Arial, sans-serif;">
+    <h1 style="text-align: center;">Thêm Sinh Viên</h1>
+
+    <!-- Form thêm sinh viên -->
+    <form id="add-student-form" style="margin-top: 20px;">
+        <div class="mb-3">
+            <label for="student_id" class="form-label">Mã Sinh Viên</label>
+            <input type="text" class="form-control" id="student_id" placeholder="Nhập mã sinh viên" required>
+        </div>
+        <div class="mb-3">
+            <label for="student_name" class="form-label">Tên Sinh Viên</label>
+            <input type="text" class="form-control" id="student_name" placeholder="Nhập tên sinh viên" required>
+        </div>
+        <div class="mb-3">
+            <label for="gender" class="form-label">Giới Tính</label>
+            <select class="form-control" id="gender" required>
+                <option value="">Chọn giới tính</option>
+                <option value="Male">Nam</option>
+                <option value="Female">Nữ</option>
+                <option value="Other">Khác</option>
+            </select>
+        </div>
+        <div class="mb-3">
+            <label for="class_name" class="form-label">Lớp</label>
+            <input type="text" class="form-control" id="class_name" placeholder="Nhập lớp" required>
+        </div>
+        <button type="submit" class="btn btn-success" style="background-color: #28a745; border: none;">Thêm Sinh Viên</button>
+    </form>
+
+    <script>
+        document.getElementById("add-student-form").addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const student_id = document.getElementById("student_id").value;
+            const student_name = document.getElementById("student_name").value;
+            const gender = document.getElementById("gender").value;
+            const class_name = document.getElementById("class_name").value;
+
+            try {
+                const response = await fetch("/api/method/student_management.student_management.doctype.student.student.add_student", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Frappe-CSRF-Token": frappe.csrf_token
+                    },
+                    body: JSON.stringify({
+                        student_id,
+                        student_name,
+                        gender,
+                        class_name
+                    })
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.message) {
+                    alert(result.message);
+                    document.getElementById("add-student-form").reset();
+                } else {
+                    alert("Lỗi: " + (result.message || "Không rõ lỗi"));
+                }
+            } catch (err) {
+                alert("Lỗi mạng hoặc server");
+                console.error(err);
+            }
+        });
+    </script>
+</div>
+{% endblock %}

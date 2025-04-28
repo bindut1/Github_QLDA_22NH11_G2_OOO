@@ -1,0 +1,117 @@
+{% extends "templates/web.html" %}
+
+{% block page_content %}
+<div class="container">
+    <h1>Chỉnh sửa Sinh Viên</h1>
+
+    <!-- Form chỉnh sửa sinh viên -->
+    <form id="edit-student-form">
+        <input type="hidden" name="name" />
+        <div class="mb-2">
+            <label for="student_id">Mã Sinh Viên</label>
+            <input type="text" class="form-control" id="student_id" placeholder="Mã Sinh Viên" readonly>
+        </div>
+        <div class="mb-2">
+            <label for="student_name">Tên Sinh Viên</label>
+            <input type="text" class="form-control" id="student_name" placeholder="Tên Sinh Viên" required>
+        </div>
+        <div class="mb-2">
+            <label for="gender">Giới Tính</label>
+            <select class="form-control" id="gender" required>
+                <option value="">Chọn Giới Tính</option>
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+                <option value="Other">Other</option>
+            </select>
+        </div>
+        <div class="mb-2">
+            <label for="class_name">Lớp</label>
+            <input type="text" class="form-control" id="class_name" placeholder="Lớp" required>
+        </div>
+        <button type="submit" class="btn btn-warning">Cập nhật Sinh Viên</button>
+        <button type="button" class="btn btn-secondary" onclick="window.location.href='/dashboard_student'">Hủy</button>
+    </form>
+</div>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const form = document.getElementById("edit-student-form");
+
+        // Lấy tham số name từ URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const studentID = urlParams.get("student_id");
+
+        if (!studentID) {
+            alert("Không tìm thấy thông tin sinh viên để chỉnh sửa!");
+            window.location.href = "/dashboard_student";
+            return;
+        }
+
+        // Load thông tin sinh viên
+        loadStudentData(studentID);
+
+        form.addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const data = {
+                student_id: document.getElementById("student_id").value,
+                student_name: document.getElementById("student_name").value,
+                gender: document.getElementById("gender").value,
+                class_name: document.getElementById("class_name").value
+            };
+
+            console.log("Data gửi đi:", data); // Kiểm tra dữ liệu
+
+            try {
+                const response = await fetch("/api/method/student_management.student_management.doctype.student.student.update_student", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-Frappe-CSRF-Token": frappe.csrf_token
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                console.log("Kết quả từ server:", result); // Kiểm tra phản hồi
+
+                if (response.ok && result.message) {
+                    alert(result.message.message || "Cập nhật thành công!");
+                    window.location.href = "/dashboard_student"; // Chuyển về trang dashboard
+                } else {
+                    alert("Lỗi: " + (result.message || "Không rõ lỗi"));
+                    console.error(result);
+                }
+            } catch (err) {
+                alert("Lỗi mạng hoặc server");
+                console.error(err);
+            }
+        });
+    });
+
+    // Hàm load thông tin sinh viên
+    async function loadStudentData(student_id) {
+        try {
+            const response = await fetch(`/api/method/student_management.student_management.doctype.student.student.get_student?student_id=${encodeURIComponent(student_id)}`);
+            const result = await response.json();
+
+            if (result.message) {
+                const student = result.message.message;
+                console.log("Thông tin sinh viên:", student); // Kiểm tra thông tin sinh viên
+                document.getElementById("student_id").value = student.student_id;
+                document.getElementById("student_name").value = student.student_name;
+                document.getElementById("gender").value = student.gender;
+                document.getElementById("class_name").value = student.class_name;
+            } else {
+                alert("Không tìm thấy thông tin sinh viên!");
+                window.location.href = "/dashboard_student";
+            }
+        } catch (err) {
+            console.error("Lỗi khi tải thông tin sinh viên:", err);
+            alert("Lỗi khi tải thông tin sinh viên!");
+            window.location.href = "/dashboard_student";
+        }
+    }
+</script>
+{% endblock %}
