@@ -1,0 +1,31 @@
+{
+    "frappe": {
+        "resolution": {
+            "commit_hash": null,
+            "branch": null
+        },
+        "required": [],
+        "idx": 1,
+        "version": "15.66.1"
+    },
+    "book_management": {
+        "is_repo": true,
+        "resolution": {
+            "commit_hash": "cd435314077b38638b3ae4cf287dced94f277545",
+            "branch": "develop"
+        },
+        "required": [],
+        "idx": 2,
+        "version": "0.0.1"
+    },
+    "student_management": {
+        "is_repo": true,
+        "resolution": {
+            "commit_hash": "567bb9e5896e4874450a2c21e9e105e6b437a5e7",
+            "branch": "develop"
+        },
+        "required": [],
+        "idx": 3,
+        "version": "0.0.1"
+    }
+}

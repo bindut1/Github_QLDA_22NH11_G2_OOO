@@ -1,0 +1,54 @@
+Tôi muốn tạo một ứng dụng web quản lý sách sử dụng Frappe framework. 
+Tôi muốn bạn tạo ứng dụng này bằng cách thực hiện theo các bước sau:
+Bước 1: Tạo app mới và cài đặt vào site
+
+    Tạo app mới tên book_management bằng lệnh bench new-app book_management.
+    Tạo site mới tên book.localhost bằng lệnh bench new-site book.localhost.
+    Cài đặt app book_management vào site book.localhost bằng lệnh bench --site book.localhost install-app book_management.
+
+Bước 2: Tạo Doctype Book
+
+    Tạo thư mục book tại đường dẫn /frappe-bench/apps/book_management/book_management/book_management/doctype/book/.
+    Đảm bảo cấu trúc thư mục bao gồm các file: __init__.py, book.py, book.json, book.js phải giống định dạng Frappe sinh ra khi tạo Doctype bằng GUI.
+    Tạo file book.py chỉ chứa import cơ bản và class rỗng. Nội dung:
+        Import frappe và Document từ frappe.model.document.
+        Tạo class Book kế thừa từ Document, để trống không thêm logic.
+    Tạo file book.json với đầy đủ các thuộc tính mặc định và các trường được yêu cầu:
+        doctype, name, module, fields, permissions và các thuộc tính khác.
+
+
+Bước 3: Thêm dữ liệu mẫu vào bảng tabBook
+    Chạy lệnh bench start
+    Chạy lệnh migrate để cập nhật database: bench --site book.localhost migrate.
+    Đăng nhập vào MariaDB bằng lệnh: bench --site book.localhost mariadb.
+    Chèn 5 dòng dữ liệu vào tabBook bằng SQL INSERT INTO:
+    INSERT INTO `tabBook` (`name`, `book_id`, `book_name`, `author`, `quantity`, `creation`, `modified`, `owner`, `modified_by`) VALUES
+    ('book1', 'B001', 'The Great Gatsby', 'F. Scott Fitzgerald', 10, NOW(), NOW(), 'Administrator', 'Administrator'),
+    ('book2', 'B002', 'To Kill a Mockingbird', 'Harper Lee', 15, NOW(), NOW(), 'Administrator', 'Administrator'),
+    ('book3', 'B003', '1984', 'George Orwell', 20, NOW(), NOW(), 'Administrator', 'Administrator'),
+    ('book4', 'B004', 'Pride and Prejudice', 'Jane Austen', 25, NOW(), NOW(), 'Administrator', 'Administrator'),
+    ('book5', 'B005', 'The Catcher in the Rye', 'J.D. Salinger', 30, NOW(), NOW(), 'Administrator', 'Administrator');
+
+Bước 4: Tạo API phụ trợ
+    Tại /frappe-bench/apps/book_management/book_management/book_management/doctype/book/book.py.
+    Viết các API sau với @frappe.whitelist():
+        get_books(): Trả về danh sách tất cả sách, dùng frappe.get_all().
+        get_book(name): Trả về thông tin chi tiết một sách dựa trên name, dùng frappe.get_doc().
+        add_book(book_id, book_name, author, quantity): Thêm sách mới, dùng frappe.get_doc() và doc.insert().
+        update_book(name, book_id, book_name, author, quantity): Cập nhật thông tin sách, dùng doc.update() và doc.save().
+        delete_book(name): Xóa sách, dùng frappe.delete_doc().
+    Đảm bảo commit thay đổi vào database sau mỗi API bằng frappe.db.commit().
+
+Bước 5: Tạo trang web book_list.html
+
+    Tạo file book_list.html tại /frappe-bench/apps/book_management/book_management/www/book_list.html.
+    File này hiển thị danh sách sách dưới dạng bảng HTML với các cột: Mã sách (book_id), Tên sách (book_name), Tác giả (author), Số lượng (quantity), và cột Hành động (các nút chức năng).
+    Thêm các nút chức năng:
+        Thêm sách mới: Mở modal để nhập thông tin sách và gọi API add_book.
+        Xem chi tiết sách: Mở modal hiển thị thông tin chi tiết sách, gọi API get_book.
+        Cập nhật thông tin sách: Mở modal để chỉnh sửa thông tin sách, gọi API update_book.
+        Xóa sách: Xóa sách và làm mới danh sách, gọi API delete_book.
+    Sử dụng HTML, CSS, JavaScript để thiết kế giao diện:
+        HTML: Tạo bảng hiển thị danh sách sách, modal cho thêm/sửa/xem chi tiết.
+        CSS: Giao diện đẹp, bảng có viền, hover effect, modal có nền mờ, các nút có màu sắc khác nhau (thêm: xanh lá, xem: xanh dương, sửa: vàng, xóa: đỏ), font chữ dễ đọc (Arial hoặc sans-serif), màu nền nhẹ (#f4f4f4).
+        JavaScript: Gọi API bằng fetch, xử lý sự kiện cho các nút (mở modal, gửi dữ liệu, làm mới bảng), đảm bảo giao diện mượt mà.
