@@ -218,6 +218,16 @@
             <li>
                 <a href="#"><i class="fa-solid fa-gear me-1"></i>Cài đặt</a>
             </li>
+            {% if user.role == 'student' %}
+            <li>
+                <a href="{% url 'accounts:student_search' %}"><i class="fas fa-search"></i> Tìm kiếm</a>
+            </li>
+            {% endif %}
+            {% if user.role == 'instructor' %}
+            <li>
+                <a href="{% url 'accounts:instructor_search' %}"><i class="fas fa-search"></i> Tìm kiếm</a>
+            </li>
+            {% endif %}
         </ul>
     </div>
 

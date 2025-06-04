@@ -14,4 +14,6 @@ urlpatterns = [
         views.instructor_edit,
         name="instructor_edit",
     ),
+    path("student/search/", views.student_search, name="student_search"),
+    path("instructor/search/", views.instructor_search, name="instructor_search"),
 ]
