@@ -188,6 +188,17 @@
             {% endif %}
             <li>
                 <a href="{% if user.role == 'instructor' %}
+                                        {% url 'courses:instructor_schedule' account_id=user.account_id %}
+                                     {% else %}
+                                        {% url 'courses:student_schedule' account_id=user.account_id %}
+                                     {% endif %}">
+                    <i class="fas fa-calendar-alt"></i>
+                    {% if user.role == 'instructor' %} Lịch dạy hôm nay {% else %} Lịch
+                    học hôm nay {% endif %}
+                </a>
+            </li>
+            <li>
+                <a href="{% if user.role == 'instructor' %}
                             {% url 'courses:instructor_schedule_week' account_id=user.account_id %}
                          {% else %}
                             {% url 'courses:student_schedule_week' account_id=user.account_id %}
