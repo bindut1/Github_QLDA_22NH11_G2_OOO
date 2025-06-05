@@ -1,0 +1,48 @@
+{% extends 'layouts/base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="mb-4 text-center">Lịch sử điểm danh của {{ student.full_name }}</h2>
+    <div class="table-responsive">
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-primary text-center">
+                <tr>
+                    <th>Môn học</th>
+                    {% for i in max_weeks %}
+                        <th>Tuần {{ forloop.counter }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for course in attendance_data %}
+                <tr>
+                    <td>{{ course.course_name }}</td>
+                    {% for week in course.weeks %}
+                    <td class="text-center">
+                        {% if week.is_future %}
+                            <!-- Tuần tương lai để trống -->
+                        {% elif week.details %}
+                            <i class="fas fa-check-circle text-success" style="font-size: 1.3rem;"></i>
+                        {% else %}
+                            <i class="fas fa-times-circle text-danger" style="font-size: 1.3rem;"></i>
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+.table th, .table td { vertical-align: middle; text-align: center; }
+.table th { background-color: #e3f2fd; }
+@media (max-width: 768px) {
+    .table-responsive { font-size: 0.95rem; }
+    h2 { font-size: 1.2rem; }
+}
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+{% endblock %}
