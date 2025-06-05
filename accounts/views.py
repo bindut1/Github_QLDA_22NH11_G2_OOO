@@ -9,6 +9,7 @@ from django.db import models
 from attendance.models import Account
 import cloudinary
 import cloudinary.uploader
+from django.db.models import Q
 
 
 def login_view(request):
@@ -84,6 +85,7 @@ def student_edit(request, account_id):
 
     return render(request, "student/edit.html", {"form": form, "student": student})
 
+
 @login_required
 def instructor_info(request):
     try:
@@ -131,4 +133,32 @@ def instructor_edit(request, account_id):
         "instructor/edit.html",
         {"form": form, "instructor": instructor},
     )
+
+
+@login_required
+def student_search(request):
+    if request.user.role != "student":
+        raise Http404("Bạn không có quyền truy cập chức năng này.")
+    query = request.GET.get("q", "").strip()
+    students = None
+    if query:
+        students = Account.objects.filter(role="student", flag=True).filter(
+            Q(full_name__icontains=query) | Q(email__icontains=query)
+        )
+    context = {"students": students}
+    return render(request, "student/search.html", context)
+
+
+@login_required
+def instructor_search(request):
+    if request.user.role != "instructor":
+        raise Http404("Bạn không có quyền truy cập chức năng này.")
+    query = request.GET.get("q", "").strip()
+    instructors = None
+    if query:
+        instructors = Account.objects.filter(flag=True).filter(
+            Q(full_name__icontains=query) | Q(email__icontains=query)
+        )
+    context = {"instructors": instructors}
+    return render(request, "instructor/search.html", context)
 
