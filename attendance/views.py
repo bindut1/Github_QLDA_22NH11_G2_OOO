@@ -1,14 +1,14 @@
-from accounts.models import Account
-from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, get_object_or_404
+from accounts.models import Account
+from courses.models import Course, ClassSchedule
 from attendance.models import Attendance
-from courses.models import Course
-from datetime import timedelta
+from datetime import timedelta, date
 import json
 from django.contrib import messages
-from datetime import date
 from django.shortcuts import render, get_object_or_404, redirect
 from core.helpers.email_helper import send_absence_warning_email
+from django.utils import timezone
 
 @login_required
 def attendance_statistic(request, account_id):
@@ -95,3 +95,59 @@ def send_warning_email(request, student_id, course_id):
         # messages.error(request, f"Không thể gửi email cảnh cáo đến {student.full_name}.")
         print("loi gui mail")
     return redirect('attendance:statistic_detail', course_id=course_id)
+
+@login_required
+def student_attendance_history(request, account_id):
+    student = get_object_or_404(Account, account_id=account_id, role='student')
+    # Lấy tất cả các course mà sinh viên tham gia qua ClassSchedule
+    courses = Course.objects.filter(classschedule__student=student).distinct()
+    today = date.today()
+    attendance_data = []
+    max_week_count = 0
+    for course in courses:
+        start_date = course.start_date
+        end_date = course.end_date
+        # Tạo danh sách ngày bắt đầu của mỗi tuần
+        weeks = []
+        week_start = start_date
+        while week_start <= end_date:
+            weeks.append(week_start)
+            week_start += timedelta(days=7)
+        if len(weeks) > max_week_count:
+            max_week_count = len(weeks)
+        week_data = []
+        for week_start in weeks:
+            week_end = week_start + timedelta(days=6)
+            is_future = week_start > today
+            attendance = Attendance.objects.filter(
+                student=student,
+                course=course,
+                check_in_date__range=(week_start, week_end)
+            ).first()
+            if attendance:
+                week_data.append({
+                    'details': json.dumps({
+                        'check_in_date': attendance.check_in_date.strftime('%Y-%m-%d'),
+                        'check_in_time': attendance.check_in_time.strftime('%H:%M:%S') if attendance.check_in_time else "N/A",
+                        'room': course.room or "N/A"
+                    }, ensure_ascii=False),
+                    'is_future': is_future
+                })
+            else:
+                week_data.append({
+                    'details': None,
+                    'is_future': is_future
+                })
+        attendance_data.append({
+            'course_name': course.course_name,
+            'weeks': week_data
+        })
+    # Tạo list số tuần tối đa để render header
+    max_weeks = range(max_week_count)
+    context = {
+        'student': student,
+        'attendance_data': attendance_data,
+        'max_weeks': max_weeks
+    }
+    return render(request, 'student/history.html', context)
+
